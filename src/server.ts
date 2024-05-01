@@ -6,7 +6,7 @@ import {
 } from "./routes/users";
 import { JWTSigner } from "./utils/auth";
 import { errorHandler } from "./middlewares/errorHandler";
-import { storeJWT } from "./middlewares/localStore";
+import { storeJWT } from "./middlewares/store";
 
 const server = express();
 const jwt = new JWTSigner("keys/private.key");
