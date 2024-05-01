@@ -18,7 +18,7 @@ export const newUserHandler = async (
 
   if (result.isErr()) return next(createHttpError(403, result.error));
 
-  const jwt = result.value.toString();
+  const jwt = req.jwt.sign({ id: result.value });
 
   res.send({ jwt });
 };
@@ -39,7 +39,7 @@ export const loginHandler = async (
   if (!(await comparePasswords(password, user.hashed_password)))
     return next(createHttpError(401, "Invalid credentials"));
 
-  const jwt = user.id.toString();
+  const jwt = req.jwt.sign({ id: user.id });
 
   res.send({ jwt });
 };

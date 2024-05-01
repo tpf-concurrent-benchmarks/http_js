@@ -1,5 +1,5 @@
-import { User } from "../utils/model";
-import { Result, ok, err } from "../utils/types";
+import { User } from "../types/model";
+import { Result, ok, err } from "../types/result";
 
 let users: User[] = [];
 
