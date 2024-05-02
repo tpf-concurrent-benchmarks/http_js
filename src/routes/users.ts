@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { newUser, findUser } from "../persistance/users";
+import { newUser, getUser } from "../persistance/users";
 import { hashPassword, comparePasswords } from "../utils/auth";
 import { validateParams } from "../middlewares/validateParams";
 import createHttpError from "http-errors";
@@ -18,9 +18,9 @@ export const newUserHandler = async (
 
   if (result.isErr()) return next(createHttpError(403, result.error));
 
-  const jwt = req.jwt.sign({ id: result.value });
+  const jwt = req.app.get("jwt").sign({ id: result.value, name: username });
 
-  res.send({ jwt });
+  res.send(jwt);
 };
 
 export const loginHandler = async (
@@ -30,7 +30,7 @@ export const loginHandler = async (
 ) => {
   const { username, password } = req.body;
 
-  const userResult = findUser(username);
+  const userResult = getUser(username);
   if (userResult.isErr())
     return next(createHttpError(404, "User does not exist"));
 
@@ -39,7 +39,7 @@ export const loginHandler = async (
   if (!(await comparePasswords(password, user.hashed_password)))
     return next(createHttpError(401, "Invalid credentials"));
 
-  const jwt = req.jwt.sign({ id: user.id });
+  const jwt = req.app.get("jwt").sign({ id: user.id, name: username });
 
-  res.send({ jwt });
+  res.send(jwt);
 };

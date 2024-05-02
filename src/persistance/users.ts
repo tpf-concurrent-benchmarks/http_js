@@ -1,10 +1,14 @@
 import { User } from "../types/model";
 import { Result, ok, err } from "../types/result";
 
-let users: User[] = [];
+let users: { [name: string]: User } = {};
 
-export const findUser = (name: string): Result<User, string> => {
-  const user = users.find((u) => u.name === name);
+export const userIdExists = (id: number): boolean => {
+  return Object.values(users).some((user) => user.id === id);
+};
+
+export const getUser = (name: string): Result<User, string> => {
+  const user = users[name];
   if (user) return ok(user);
   return err("User not found");
 };
@@ -13,13 +17,11 @@ export const newUser = (
   name: string,
   hashed_password: string
 ): Result<number, string> => {
-  if (findUser(name).isOk()) return err("User already exists");
+  if (getUser(name).isOk()) return err("User already exists");
 
-  const id = users.length;
+  const id = Object.keys(users).length + 1;
   const user: User = { id, name, hashed_password };
-  users.push(user);
-
-  console.log(users);
+  users[name] = user;
 
   return ok(id);
 };
