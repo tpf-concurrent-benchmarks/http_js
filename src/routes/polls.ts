@@ -62,9 +62,9 @@ export const voteHandler = (
 ) => {
   const userId = req.locals.userId;
   const { poll_id } = req.params;
-  if (typeof req?.query?.option_id !== "string")
-    return next(createHttpError(400, "option_id must be a string"));
-  const option_id = req.query.option_id;
+  if (typeof req?.query?.option !== "string")
+    return next(createHttpError(400, "option must be a string"));
+  const option_id = req.query.option;
 
   const result = vote(userId, parseInt(poll_id), parseInt(option_id));
 
