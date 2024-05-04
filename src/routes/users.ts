@@ -2,18 +2,19 @@ import { Request, Response, NextFunction } from "express";
 import { newUser, getUser } from "../persistance/users";
 import { hashPassword, comparePasswords } from "../utils/auth";
 import { validateParams } from "../middlewares/validateParams";
+import { userSchema, UserRequest } from "../schemas/users";
 import createHttpError from "http-errors";
 
-export const validateUserParams = validateParams(["username", "password"]);
+export const validateUserParams = validateParams({ body: userSchema });
 
 export const newUserHandler = async (
-  req: Request,
+  req: UserRequest,
   res: Response,
   next: NextFunction
 ) => {
   const { username, password } = req.body;
-  const hashed_password = await hashPassword(password);
 
+  const hashed_password = await hashPassword(password);
   const result = newUser(username, hashed_password);
 
   if (result.isErr()) return next(createHttpError(403, result.error));
@@ -24,7 +25,7 @@ export const newUserHandler = async (
 };
 
 export const loginHandler = async (
-  req: Request,
+  req: UserRequest,
   res: Response,
   next: NextFunction
 ) => {

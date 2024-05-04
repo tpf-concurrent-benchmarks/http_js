@@ -3,12 +3,15 @@ import { newPoll, getPolls } from "../persistance/polls";
 import { getPoll, deletePoll } from "../persistance/polls";
 import { vote } from "../persistance/polls";
 import { validateParams } from "../middlewares/validateParams";
+import { newPollSchema, NewPollRequest } from "../schemas/polls";
+import { pollParamsSchema, PollRequest } from "../schemas/polls";
+import { voteParamsSchema, voteQuerySchema } from "../schemas/polls";
+import { VoteRequest } from "../schemas/polls";
 import createHttpError from "http-errors";
-import { parse } from "path";
 
-export const validateNewPollParams = validateParams(["topic", "options"]);
+export const validateNewPollParams = validateParams({ body: newPollSchema });
 export const newPollHandler = (
-  req: Request,
+  req: NewPollRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -29,44 +32,45 @@ export const getPollsHandler = (
   res.send(polls);
 };
 
-export const validatePollParams = validateParams(["id"]);
+export const validatePollParams = validateParams({ params: pollParamsSchema });
 
 export const getPollHandler = (
-  req: Request,
+  req: PollRequest,
   res: Response,
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const poll = getPoll(parseInt(id));
+  const poll = getPoll(id);
   if (poll.isErr()) return next(createHttpError(404, poll.error));
   res.send(poll.value);
 };
 
 export const deletePollHandler = (
-  req: Request,
+  req: PollRequest,
   res: Response,
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const result = deletePoll(parseInt(id));
+  const result = deletePoll(id);
   if (result.isErr()) return next(createHttpError(404, result.error));
   res.send("OK");
 };
 
-export const validateVoteParams = validateParams(["poll_id", "option_id"]);
+export const validateVoteParams = validateParams({
+  params: voteParamsSchema,
+  query: voteQuerySchema,
+});
 
 export const voteHandler = (
-  req: Request,
+  req: VoteRequest,
   res: Response,
   next: NextFunction
 ) => {
   const userId = req.locals.userId;
   const { poll_id } = req.params;
-  if (typeof req?.query?.option !== "string")
-    return next(createHttpError(400, "option must be a string"));
   const option_id = req.query.option;
 
-  const result = vote(userId, parseInt(poll_id), parseInt(option_id));
+  const result = vote(userId, poll_id, option_id);
 
   if (result.isErr()) return next(createHttpError(404, result.error));
 
