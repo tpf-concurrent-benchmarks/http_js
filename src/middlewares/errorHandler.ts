@@ -18,7 +18,7 @@ export const errorHandler = (
   } else if (isJsonError(err)) {
     res.status(400).send("Invalid JSON");
   } else {
-    console;
+    console.error(err);
     res.status(500).send("Unknown Server Error");
   }
 };

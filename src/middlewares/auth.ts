@@ -24,10 +24,10 @@ export const authenticateUser = (
   if (invalidUserId || invalidUserName)
     return next(createHttpError(401, "Invalid JWT"));
 
-  if (getUser(user.name).isErr()) {
-    return next(createHttpError(404, "User does not exist"));
-  }
-
-  req.locals = { userId: user.id };
-  next();
+  getUser(user.name)
+    .then((user) => {
+      req.locals = { userId: user.id };
+      next();
+    })
+    .catch(next);
 };
