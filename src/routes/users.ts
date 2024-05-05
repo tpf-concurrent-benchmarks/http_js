@@ -15,13 +15,13 @@ export const newUserHandler = async (
   const { username, password } = req.body;
 
   const hashed_password = await hashPassword(password);
-  const result = newUser(username, hashed_password);
 
-  if (result.isErr()) return next(createHttpError(403, result.error));
-
-  const jwt = req.app.get("jwt").sign({ id: result.value, name: username });
-
-  res.send(jwt);
+  newUser(username, hashed_password)
+    .then((dbUser) => {
+      const jwt = req.app.get("jwt").sign({ id: dbUser.id, name: username });
+      res.send(jwt);
+    })
+    .catch(next);
 };
 
 export const loginHandler = async (
@@ -31,16 +31,16 @@ export const loginHandler = async (
 ) => {
   const { username, password } = req.body;
 
-  const userResult = getUser(username);
-  if (userResult.isErr())
-    return next(createHttpError(404, "User does not exist"));
+  getUser(username)
+    .then(async (user) => {
+      if (!user) return next(createHttpError(404, "User does not exist"));
 
-  const user = userResult.value;
+      if (!(await comparePasswords(password, user.hashed_password)))
+        return next(createHttpError(401, "Invalid credentials"));
 
-  if (!(await comparePasswords(password, user.hashed_password)))
-    return next(createHttpError(401, "Invalid credentials"));
+      const jwt = req.app.get("jwt").sign({ id: user.id, name: username });
 
-  const jwt = req.app.get("jwt").sign({ id: user.id, name: username });
-
-  res.send(jwt);
+      res.send(jwt);
+    })
+    .catch(next);
 };

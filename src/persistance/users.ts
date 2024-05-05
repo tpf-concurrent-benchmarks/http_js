@@ -1,27 +1,23 @@
-import { User } from "../types/model";
-import { Result, ok, err } from "../types/result";
+import { User } from "../db/models";
+import createHttpError from "http-errors";
 
-let users: { [name: string]: User } = {};
+export const getUser = (name: string): Promise<User> =>
+  User.findOne({ where: { user_name: name } }).then((user) => {
+    if (!user) throw createHttpError(404, "User does not exist");
 
-export const userIdExists = (id: number): boolean => {
-  return Object.values(users).some((user) => user.id === id);
-};
+    return user;
+  });
 
-export const getUser = (name: string): Result<User, string> => {
-  const user = users[name];
-  if (user) return ok(user);
-  return err("User not found");
-};
-
-export const newUser = (
+export const newUser = async (
   name: string,
   hashed_password: string
-): Result<number, string> => {
-  if (getUser(name).isOk()) return err("User already exists");
+): Promise<User> =>
+  new User({ user_name: name, hashed_password }).save().catch((error) => {
+    if (error.name === "SequelizeUniqueConstraintError")
+      throw createHttpError(409, "User already exists");
 
-  const id = Object.keys(users).length + 1;
-  const user: User = { id, name, hashed_password };
-  users[name] = user;
+    if (error.name === "SequelizeValidationError")
+      throw createHttpError(400, error.errors[0].message);
 
-  return ok(id);
-};
+    throw createHttpError(500, "Error creating user");
+  });

@@ -6,7 +6,17 @@ if (!process.env.DATABASE)
 
 const sequelize = new Sequelize(process.env.DATABASE);
 
-sequelize.addModels(models);
+export const initialize = async () => {
+  console.log("INITIALIZING DB - IN PROGRESS");
+  try {
+    sequelize.addModels(models);
+    await sequelize.sync();
+    console.log("INITIALIZING DB - SUCCESSFUL");
+  } catch (error) {
+    console.error("INITIALIZING DB - ERROR - ", error);
+    throw error;
+  }
+};
 
 export const authenticate = async () => {
   console.log("AUTHENTICATING DB - IN PROGRESS");

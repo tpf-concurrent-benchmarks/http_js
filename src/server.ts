@@ -1,9 +1,11 @@
 import express from "express";
-
+import { authenticate, initialize as initializeDB } from "./db";
 import { JWTSigner } from "./utils/auth";
 import usersRouter from "./routes/usersRouter";
 import pollsRouter from "./routes/pollsRouter";
 import { errorHandler } from "./middlewares/errorHandler";
+
+initializeDB();
 
 const server = express();
 const jwt = new JWTSigner("keys/private.key");
