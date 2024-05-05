@@ -7,22 +7,25 @@ export const authenticateUser = (
   res: Response,
   next: NextFunction
 ) => {
-  const jwt = req.headers.authorization;
+  const auth = req.headers.authorization;
 
-  if (!jwt) {
-    return next(createHttpError(401, "Unauthorized"));
-  }
+  if (!auth || typeof auth !== `string`)
+    return next(createHttpError(401, "Missing Authorization Header"));
+
+  const [type, jwt] = auth.split(" ");
+
+  if (type !== "Bearer" || !jwt)
+    return next(createHttpError(401, "Invalid Authorization Header"));
 
   const user: any = req.app.get("jwt").verify(jwt);
+  const invalidUserId = !user?.id || typeof user.id != "number";
+  const invalidUserName = !user.name || typeof user.name != "string";
 
-  if (!user?.id || typeof user.id != "number")
-    return next(createHttpError(401, "Unauthorized"));
-
-  if (!user.name || typeof user.name != "string")
-    return next(createHttpError(401, "Unauthorized"));
+  if (invalidUserId || invalidUserName)
+    return next(createHttpError(401, "Invalid JWT"));
 
   if (getUser(user.name).isErr()) {
-    return next(createHttpError(401, "Unauthorized"));
+    return next(createHttpError(404, "User does not exist"));
   }
 
   req.locals = { userId: user.id };
