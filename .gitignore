@@ -2,3 +2,4 @@ node_modules
 dist
 keys
 .env
+config.json
