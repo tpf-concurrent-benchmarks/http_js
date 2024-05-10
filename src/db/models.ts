@@ -44,15 +44,12 @@ export class Poll extends Model {
 
   @ForeignKey(() => User)
   @Column(DataType.INTEGER.UNSIGNED)
-  creatorId!: number;
+  creator_id!: number;
   @BelongsTo(() => User)
   creator!: User;
 
   @HasMany(() => PollOption)
   options!: PollOption[];
-
-  @HasMany(() => Vote)
-  votes!: Vote[];
 }
 
 @Table
@@ -81,20 +78,18 @@ export class Vote extends Model {
   @PrimaryKey
   @ForeignKey(() => User)
   @Column(DataType.INTEGER.UNSIGNED)
-  userId!: number;
+  user_id!: number;
   @BelongsTo(() => User)
   user!: User;
 
   @PrimaryKey
-  @ForeignKey(() => Poll)
+  @ForeignKey(() => PollOption)
   @Column(DataType.INTEGER.UNSIGNED)
-  pollId!: number;
-  @BelongsTo(() => Poll)
-  poll!: Poll;
+  poll_id!: number;
 
   @ForeignKey(() => PollOption)
   @Column(DataType.INTEGER.UNSIGNED)
-  optionId!: number;
+  option_id!: number;
   @BelongsTo(() => PollOption)
   option!: PollOption;
 }

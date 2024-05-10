@@ -7,7 +7,7 @@ import { newPollSchema, NewPollRequest } from "../schemas/polls";
 import { pollParamsSchema, PollRequest } from "../schemas/polls";
 import { voteParamsSchema, voteQuerySchema } from "../schemas/polls";
 import { VoteRequest } from "../schemas/polls";
-import createHttpError from "http-errors";
+import { transformGetPollsResults } from "../persistance/transformers";
 
 export const validateNewPollParams = validateParams({ body: newPollSchema });
 export const newPollHandler = (
@@ -18,9 +18,11 @@ export const newPollHandler = (
   const userId = req.locals.userId;
   const { topic, options } = req.body;
 
-  const id = newPoll(userId, topic, options);
-
-  res.send({ id });
+  newPoll(userId, topic, options)
+    .then((poll) => {
+      res.send(String(poll.id));
+    })
+    .catch(next);
 };
 
 export const getPollsHandler = (
@@ -28,8 +30,11 @@ export const getPollsHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  const polls = getPolls();
-  res.send(polls);
+  getPolls()
+    .then((polls) => {
+      res.send(transformGetPollsResults(polls));
+    })
+    .catch(next);
 };
 
 export const validatePollParams = validateParams({ params: pollParamsSchema });
@@ -40,9 +45,11 @@ export const getPollHandler = (
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const poll = getPoll(id);
-  if (poll.isErr()) return next(createHttpError(404, poll.error));
-  res.send(poll.value);
+  getPoll(id)
+    .then((poll) => {
+      res.send(poll);
+    })
+    .catch(next);
 };
 
 export const deletePollHandler = (
@@ -51,9 +58,12 @@ export const deletePollHandler = (
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const result = deletePoll(id);
-  if (result.isErr()) return next(createHttpError(404, result.error));
-  res.send("OK");
+  const userId = req.locals.userId;
+  deletePoll(id, userId)
+    .then((poll) => {
+      res.send(String(poll.id));
+    })
+    .catch(next);
 };
 
 export const validateVoteParams = validateParams({
@@ -70,9 +80,9 @@ export const voteHandler = (
   const { poll_id } = req.params;
   const option_id = req.query.option;
 
-  const result = vote(userId, poll_id, option_id);
-
-  if (result.isErr()) return next(createHttpError(404, result.error));
-
-  res.send(result.value);
+  vote(userId, poll_id, option_id)
+    .then((vote) => {
+      res.send("OK");
+    })
+    .catch(next);
 };
