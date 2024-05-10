@@ -36,4 +36,6 @@ TODO:
   - [x] GET /polls
   - [x] GET /polls/:id
 - [x] Validación de Params
-- [ ] Base de Datos
+- [x] Base de Datos
+- [ ] Ajustes: field names, vote: invalid opt, TBD+
+- [ ] README.md
