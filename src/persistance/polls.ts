@@ -1,87 +1,68 @@
-import {
-  BasePoll,
-  BasePollOption,
-  PollOption,
-  Poll,
-  Vote,
-} from "../types/model";
-import { Result, ok, err } from "../types/result";
+import sequelize from "../db";
+import { Poll, PollOption, Vote } from "../db/models";
+import createHttpError from "http-errors";
+import { getPollQuery, getPollQueryResults } from "./queries";
+import { transformGetPollResults } from "./transformers";
 
-let poll_id_counter = 0;
-const polls: { [id: number]: BasePoll } = {};
-const pollOptions: { [id: number]: BasePollOption[] } = {};
-const votes: { [id: number]: { [user_id: number]: number } } = {};
-
-const getVotes = (poll_id: number, option_id: number): Vote[] => {
-  const pollVotes = votes[poll_id];
-  if (!pollVotes) return [];
-  return Object.entries(pollVotes)
-    .filter(([, vote]) => vote === option_id)
-    .map(
-      ([user_id]): Vote => ({
-        id: 0,
-        user_id: parseInt(user_id),
-        poll_option_id: option_id,
-      })
-    );
-};
-
+const mapOptions = (options: string[]) =>
+  options.map((option_text) => ({ option_text }));
 export const newPoll = (
   creator_id: number,
-  topic: string,
+  poll_topic: string,
   options: string[]
-): number => {
-  const id = poll_id_counter++;
-  const poll: BasePoll = { id, creator_id, topic };
-  polls[id] = poll;
+): Promise<Poll> =>
+  new Poll(
+    { creator_id, poll_topic, options: mapOptions(options) },
+    { include: [PollOption] }
+  )
+    .save()
+    .then((poll) => {
+      if (!poll) throw createHttpError(404, "Poll not found");
+      return poll;
+    });
 
-  pollOptions[id] = options.map(
-    (description, index): BasePollOption => ({
-      id: index,
-      poll_id: id,
-      description,
-    })
-  );
-  return id;
-};
+export const getPolls = (): Promise<Poll[]> =>
+  Poll.findAll().catch((error) => {
+    console.log(error.name);
+    throw createHttpError(500, "Error getting polls");
+  });
 
-export const getPolls = (): BasePoll[] => Object.values(polls);
+export const getPoll = (id: number): Promise<any> =>
+  sequelize.query(getPollQuery(id)).then(([results, _metadata]) => {
+    if (!results || results.length === 0)
+      throw createHttpError(404, "Poll not found");
 
-export const getPoll = (id: number): Result<Poll, string> => {
-  if (!polls[id]) return err("Poll not found");
+    return transformGetPollResults(results as getPollQueryResults);
+  });
 
-  const options = pollOptions[id].map(
-    (option: BasePollOption): PollOption => ({
-      ...option,
-      votes: getVotes(id, option.id),
-    })
-  );
-  return ok({ ...polls[id], options });
-};
+export const deletePoll = (id: number, userId: number): Promise<Poll> =>
+  Poll.findByPk(id).then((poll) => {
+    if (!poll) throw createHttpError(404, "Poll not found");
 
-export const deletePoll = (id: number): Result<void, string> => {
-  if (!polls[id]) return err("Poll not found");
+    if (poll.creator_id !== userId)
+      throw createHttpError(403, "You are not authorized to delete this poll");
 
-  delete polls[id];
-  delete pollOptions[id];
-  return ok(undefined);
-};
+    poll.destroy();
+
+    return poll;
+  });
+
+const createVote = (user_id: number, poll_id: number, option_id: number) =>
+  new Vote({ user_id, poll_id, option_id }).save();
 
 export const vote = (
   user_id: number,
   poll_id: number,
   option_id: number
-): Result<string, string> => {
-  if (!polls[poll_id]) return err("Poll not found");
-  if (!votes[poll_id]) votes[poll_id] = {};
+): Promise<Vote> =>
+  Vote.findOne({ where: { user_id, poll_id } }).then((vote) => {
+    if (!vote) return createVote(user_id, poll_id, option_id);
 
-  const previousVote = votes[poll_id][user_id];
+    if (vote.option_id === option_id) {
+      vote.destroy();
+      return vote;
+    }
 
-  if (previousVote === option_id) {
-    delete votes[poll_id][user_id];
-    return ok("Vote removed");
-  } else {
-    votes[poll_id][user_id] = option_id;
-    return ok(`Voted for option ${option_id} on poll ${poll_id}`);
-  }
-};
+    vote.option_id = option_id;
+    return vote.save();
+  });
