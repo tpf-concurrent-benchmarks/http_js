@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { newPoll, getPolls } from "../persistance/polls";
+import { newPoll, getPolls, getPollOption } from "../persistance/polls";
 import { getPoll, deletePoll } from "../persistance/polls";
 import { vote } from "../persistance/polls";
 import { validateParams } from "../middlewares/validateParams";
@@ -71,7 +71,7 @@ export const validateVoteParams = validateParams({
   query: voteQuerySchema,
 });
 
-export const voteHandler = (
+export const voteHandler = async (
   req: VoteRequest,
   res: Response,
   next: NextFunction
@@ -79,6 +79,12 @@ export const voteHandler = (
   const userId = req.locals.userId;
   const { poll_id } = req.params;
   const option_id = req.query.option;
+
+  try {
+    await getPollOption(poll_id, option_id);
+  } catch (error) {
+    return next(error);
+  }
 
   vote(userId, poll_id, option_id)
     .then((vote) => {

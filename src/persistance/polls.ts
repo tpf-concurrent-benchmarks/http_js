@@ -35,6 +35,15 @@ export const getPoll = (id: number): Promise<any> =>
     return transformGetPollResults(results as getPollQueryResults);
   });
 
+export const getPollOption = (
+  poll_id: number,
+  option_id: number
+): Promise<PollOption> =>
+  PollOption.findOne({ where: { poll_id, option_id } }).then((option) => {
+    if (!option) throw createHttpError(404, "Option not found");
+    return option;
+  });
+
 export const deletePoll = (id: number, userId: number): Promise<Poll> =>
   Poll.findByPk(id).then((poll) => {
     if (!poll) throw createHttpError(404, "Poll not found");
