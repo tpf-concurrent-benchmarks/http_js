@@ -12,7 +12,10 @@ export const transformGetPollResults = (results: getPollQueryResults) => ({
 });
 
 export const transformGetPollsResults = (results: Poll[]) =>
-  results.map((poll) => ({
-    poll_id: poll.id,
-    poll_topic: poll.poll_topic,
-  }));
+  ({
+    polls : results.map((poll) => ({
+      poll_id: poll.id,
+      poll_topic: poll.poll_topic,
+    }))
+  });
+

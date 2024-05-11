@@ -13,8 +13,8 @@ const jwt = new JWTSigner("keys/private.key");
 server.set("jwt", jwt);
 server.use(express.json());
 
-server.use(usersRouter);
-server.use(pollsRouter);
+server.use("/api", usersRouter);
+server.use("/api", pollsRouter);
 
 server.use(errorHandler);
 

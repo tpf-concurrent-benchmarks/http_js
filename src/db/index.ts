@@ -1,10 +1,11 @@
 import { Sequelize } from "sequelize-typescript";
 import models from "./models";
 
-if (!process.env.DATABASE)
-  throw new Error("DATABASE environment variable is not defined");
+if (!process.env.POSTGRES_USER || !process.env.POSTGRES_PASSWORD || !process.env.POSTGRES_DB)
+  throw new Error("DATABASE environment variables are not defined");
 
-const sequelize = new Sequelize(process.env.DATABASE);
+const DATABASE = `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@postgres:5432/${process.env.POSTGRES_DB}`
+const sequelize = new Sequelize(DATABASE);
 
 export const initialize = async () => {
   console.log("INITIALIZING DB - IN PROGRESS");
