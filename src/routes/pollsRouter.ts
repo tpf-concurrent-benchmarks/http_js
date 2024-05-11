@@ -7,14 +7,12 @@ import { Router } from "express";
 
 const pollsRouter = Router();
 
-pollsRouter.use(authenticateUser);
-
-pollsRouter.post("/polls", validateNewPollParams, newPollHandler);
+pollsRouter.post("/polls", authenticateUser, validateNewPollParams, newPollHandler);
 pollsRouter.get("/polls", getPollsHandler);
 
 pollsRouter.get("/polls/:id", validatePollParams, getPollHandler);
-pollsRouter.delete("/polls/:id", validatePollParams, deletePollHandler);
+pollsRouter.delete("/polls/:id", authenticateUser, validatePollParams, deletePollHandler);
 
-pollsRouter.post("/polls/:poll_id/vote", validateVoteParams, voteHandler);
+pollsRouter.post("/polls/:poll_id/vote", authenticateUser, validateVoteParams, voteHandler);
 
 export default pollsRouter;

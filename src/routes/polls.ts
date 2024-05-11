@@ -16,9 +16,9 @@ export const newPollHandler = (
   next: NextFunction
 ) => {
   const userId = req.locals.userId;
-  const { topic, options } = req.body;
+  const { poll_topic, options } = req.body;
 
-  newPoll(userId, topic, options)
+  newPoll(userId, poll_topic, options)
     .then((poll) => {
       res.send(String(poll.id));
     })

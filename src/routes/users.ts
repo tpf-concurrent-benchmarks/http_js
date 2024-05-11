@@ -19,7 +19,7 @@ export const newUserHandler = async (
   newUser(username, hashed_password)
     .then((dbUser) => {
       const jwt = req.app.get("jwt").sign({ id: dbUser.id, name: username });
-      res.send(jwt);
+      res.send({"access_token": jwt, "token_type": "bearer"});
     })
     .catch(next);
 };
@@ -40,7 +40,7 @@ export const loginHandler = async (
 
       const jwt = req.app.get("jwt").sign({ id: user.id, name: username });
 
-      res.send(jwt);
+      res.send({"access_token": jwt, "token_type": "bearer"});
     })
     .catch(next);
 };
