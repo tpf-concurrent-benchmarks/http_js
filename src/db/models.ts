@@ -36,14 +36,14 @@ export class User extends Model {
 export class Poll extends Model {
   @PrimaryKey
   @AutoIncrement
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   id!: number;
 
   @Column
   poll_topic!: string;
 
   @ForeignKey(() => User)
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   creator_id!: number;
   @BelongsTo(() => User)
   creator!: User;
@@ -56,14 +56,14 @@ export class Poll extends Model {
 export class PollOption extends Model {
   @ForeignKey(() => Poll)
   @PrimaryKey
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   poll_id!: number;
   @BelongsTo(() => Poll)
   poll!: Poll;
 
   @PrimaryKey
   @AutoIncrement
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   option_id!: number;
 
   @Column
@@ -77,18 +77,18 @@ export class PollOption extends Model {
 export class Vote extends Model {
   @PrimaryKey
   @ForeignKey(() => User)
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   user_id!: number;
   @BelongsTo(() => User)
   user!: User;
 
   @PrimaryKey
   @ForeignKey(() => PollOption)
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   poll_id!: number;
 
   @ForeignKey(() => PollOption)
-  @Column(DataType.INTEGER.UNSIGNED)
+  @Column(DataType.INTEGER)
   option_id!: number;
   @BelongsTo(() => PollOption)
   option!: PollOption;

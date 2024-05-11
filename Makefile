@@ -36,5 +36,8 @@ deploy: remove build
 	do sleep 1; \
 	done
 
+dev:
+	npm run dev
+
 logs:
 	docker service logs http_js_app -f

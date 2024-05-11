@@ -17,9 +17,13 @@ export class JWTSigner {
   private secret: string;
   private config: { [param: string]: string };
 
-  constructor(privateKeyPath: string, algorithm: string = "RS256") {
-    this.secret = require("fs").readFileSync(privateKeyPath, "utf8");
-    this.config = { algorithm };
+  constructor(
+    secret: string,
+    algorithm: string = "HS256",
+    expiresIn: string = "1d"
+  ) {
+    this.secret = secret;
+    this.config = { algorithm, expiresIn };
   }
 
   sign(payload: string | object): string {
