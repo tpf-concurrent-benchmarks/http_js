@@ -74,11 +74,11 @@ services:
 
   app:
     image: http_js
+    command: sh -c "sleep 10 && npm start"
     volumes:
       - ".env:/opt/app/.env:ro"
-      - "./keys:/opt/app/keys:ro"
     ports:
-      - "9999:${PORT}"
+      - "9999:${APP_PORT}"
     deploy:
       restart_policy:
         condition: none
@@ -90,7 +90,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - ./data/postgres_data:/var/lib/postgresql/data
     deploy:
       restart_policy:
         condition: none
