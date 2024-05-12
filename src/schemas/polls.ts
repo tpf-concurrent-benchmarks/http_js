@@ -3,7 +3,7 @@ import { Request } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 
 export const newPollSchema = z.object({
-  poll_topic: z.string(),
+  title: z.string(),
   options: z.string().array().min(2),
 });
 
