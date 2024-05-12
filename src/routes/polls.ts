@@ -80,12 +80,6 @@ export const voteHandler = async (
   const { poll_id } = req.params;
   const option_id = req.query.option;
 
-  try {
-    await getPollOption(poll_id, option_id);
-  } catch (error) {
-    return next(error);
-  }
-
   vote(userId, poll_id, option_id)
     .then((vote) => {
       res.send("OK");
