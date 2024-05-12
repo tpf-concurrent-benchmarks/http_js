@@ -5,7 +5,7 @@ import { getPollQuery, getPollQueryResults } from "./queries";
 import { transformGetPollResults } from "./transformers";
 
 const mapOptions = (options: string[]) =>
-  options.map((option_text) => ({ option_text }));
+  options.map((option_text, option_id) => ({ option_id, option_text }));
 export const newPoll = (
   creator_id: number,
   poll_topic: string,
