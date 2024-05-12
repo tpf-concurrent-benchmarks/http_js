@@ -16,6 +16,9 @@ const DATABASE = `postgres://${DB_AUTH}@${DB_ADDR}/${POSTGRES_DB}`;
 const sequelize = new Sequelize(DATABASE, {
   dialect: "postgres",
   logging: false,
+  define: {
+    timestamps: false,
+  },
 });
 
 export const initialize = async () => {
