@@ -5,7 +5,7 @@ export const transformGetPollResults = (results: getPollQueryResults) => ({
   id: results[0].poll_id,
   title: results[0].poll_topic,
   options: results.map((result) => ({
-    option_text: result.option_text,
+    name: result.option_text,
     votes: Number(result.votes),
   })),
 });
