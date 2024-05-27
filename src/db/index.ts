@@ -1,6 +1,7 @@
 import { Sequelize } from "sequelize-typescript";
 import models from "./models";
 
+const { PROCS } = process.env;
 const { POSTGRES_USER, POSTGRES_PASSWORD } = process.env;
 const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB } = process.env;
 
@@ -18,6 +19,12 @@ const sequelize = new Sequelize(DATABASE, {
   logging: false,
   define: {
     timestamps: false,
+  },
+  pool: {
+    max: parseInt(PROCS || "5") || 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
   },
 });
 
