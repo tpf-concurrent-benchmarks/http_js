@@ -8,17 +8,19 @@ import { randomUUID } from "crypto";
 
 const { SECRET_KEY, SECRET_ALGORITHM } = process.env;
 
-initializeDB();
+export const makeServer = async () => {
+  await initializeDB();
 
-const server = express();
-const jwt = new JWTSigner(SECRET_KEY || randomUUID(), SECRET_ALGORITHM);
+  const server = express();
+  const jwt = new JWTSigner(SECRET_KEY || randomUUID(), SECRET_ALGORITHM);
 
-server.set("jwt", jwt);
-server.use(express.json());
+  server.set("jwt", jwt);
+  server.use(express.json());
 
-server.use("/api", usersRouter);
-server.use("/api", pollsRouter);
+  server.use("/api", usersRouter);
+  server.use("/api", pollsRouter);
 
-server.use(errorHandler);
+  server.use(errorHandler);
 
-export default server;
+  return server;
+};

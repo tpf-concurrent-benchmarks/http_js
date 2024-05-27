@@ -24,11 +24,11 @@ const sequelize = new Sequelize(DATABASE, {
 export const initialize = async () => {
   console.log("INITIALIZING DB - IN PROGRESS");
   try {
-    sequelize.addModels(models);
+    await sequelize.addModels(models);
     await sequelize.sync();
     console.log("INITIALIZING DB - SUCCESSFUL");
-  } catch (error) {
-    console.error("INITIALIZING DB - ERROR - ", error);
+  } catch (error: any) {
+    console.error("INITIALIZING DB - ERROR - ", error?.name, error?.message);
     throw error;
   }
 };

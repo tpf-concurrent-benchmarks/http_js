@@ -28,6 +28,9 @@ remove:
 		docker stack rm http_js; \
 	fi
 
+remove_stack:
+	docker stack rm http_js
+
 deploy: remove build
 
 	until \
